@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 245, 245, 245;
+  --background-start-rgb: 5, 5, 5;
+  --background-end-rgb: 5, 5, 5;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-start-rgb));
+  font-family: 'Inter', sans-serif;
+}
+
+@layer components {
+  .brutal-border {
+    @apply border-4 border-black shadow-brutal;
+  }
+  
+  .brutal-border-white {
+    @apply border-4 border-aura-white shadow-brutal-white;
+  }
+
+  .brutal-button {
+    @apply brutal-border-white bg-aura-white text-aura-black font-bold px-4 py-2 hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all;
+  }
+
+  .brutal-card {
+    @apply brutal-border-white bg-aura-black p-4;
+  }
+}

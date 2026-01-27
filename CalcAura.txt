@@ -1,0 +1,99 @@
+# PROJECT: CalcAura
+# CONTEXT: Master Specification Document
+# DATE: 2026-01-27
+# AUTHOR: Advisor to Evan
+
+================================================================================
+1. EXECUTIVE SUMMARY
+================================================================================
+You are building "CalcAura," a private, invite-only website for a close-knit group 
+of friends. The site tracks "Aura Points" (a social score). 
+
+The goal is to create a mobile-responsive web application where friends can 
+"Report" each other for doing embarrassing things (losing points) or cool things 
+(gaining points). The group votes on these reports. The system prioritizes speed 
+and "Raw Democracy" (mob rule is allowed).
+
+================================================================================
+2. CORE CONCEPTS & DATA NEEDS
+================================================================================
+The application needs to store and manage the following data concepts:
+
+A. USERS (PROFILES)
+   - Every user has a Username, an Avatar (image), and a Current Aura Score.
+   - Everyone starts with 1000 Aura Points.
+   - The system must differentiate between a standard user and an Admin (for 
+     maintenance purposes).
+
+B. INCIDENTS (THE REPORTS)
+   - A report consists of:
+     1. The Reporter (User A)
+     2. The Offender (User B)
+     3. A Description of what happened (e.g., "Tripped on stairs")
+     4. The Amount of Aura to deduct or add.
+     5. Optional: Evidence (a link to an image or upload).
+     6. Status: Is it Pending, Disputed, Approved, or Rejected?
+     7. Timestamps: When it was created and when it expires.
+
+C. VOTES
+   - The system must track which user voted on which incident.
+   - A user can vote "Agree" or "Disagree."
+   - The system must prevent a user from voting twice on the same report.
+
+D. SEASONS (HISTORY)
+   - The system needs to track who won previous months (Seasons) so the leaderboard 
+     can be reset without losing history.
+
+================================================================================
+3. BUSINESS LOGIC & RULES
+================================================================================
+
+RULE 1: THE SPAM COOLDOWN
+- To prevent bullying or spam, a user cannot create a new report against the 
+  SAME person within 1 hour of their previous report against that person.
+
+RULE 2: VOTING MECHANICS (RAW DEMOCRACY)
+- When a report is filed, it enters a "Pending" state.
+- If more than 50% of the group votes "Agree" within 1 hour, the report is 
+  automatically "Approved," and the points are deducted/added immediately.
+- If anyone votes "Disagree" before it is approved, the status changes to 
+  "Disputed."
+- Once "Disputed," the voting window remains open for 24 hours.
+
+RULE 3: THE JUDGE PROTOCOL (FAIL-SAFE)
+- If a report is "Disputed" and the 24-hour window runs out without a resolution:
+  1. The system must find the "Judge."
+  2. The Judge is defined as the user with the HIGHEST Aura Score who is 
+     NOT the Reporter and NOT the Offender.
+  3. If the highest score user is involved, the system picks the second highest.
+  4. This Judge gets a special button on their screen to decide the outcome 
+     unilaterally.
+
+RULE 4: SEASONS & RESETS
+- On the 1st of every month, the application must automatically:
+  1. Record the current winner (highest score).
+  2. Reset everyone's score back to 1000.
+  3. Clear the main feed for a fresh start.
+
+================================================================================
+4. UI/UX GUIDELINES
+================================================================================
+- Platform: Web Application (Must look good on mobile phone browsers).
+- Design Style: "Brutalist" and High Contrast. Dark mode by default.
+- Navigation: Simple bottom or top bar with:
+  1. Feed (The list of active reports).
+  2. Leaderboard (Who is winning).
+  3. Profile (My stats).
+  4. "Report" Button (Big, easy to access button to file a new case).
+- Interactions: Voting should be instant. No complex forms.
+
+================================================================================
+5. INSTRUCTIONS FOR THE DEVELOPER
+================================================================================
+1. Select a modern, efficient web technology stack suitable for this project.
+2. Set up a database structure that supports the concepts listed above.
+3. Implement an authentication system (simple login/signup).
+4. Create the "Report" flow so users can file incidents quickly.
+5. Create the "Feed" view where users can see and vote on reports.
+6. Implement the "Judge" logic to handle tied or expired disputes.
+7. Ensure the site is responsive and works like an app on mobile browsers.
