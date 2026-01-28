@@ -87,14 +87,8 @@ export default function LoginPage() {
         </form>
       </div>
 
-      <div className="text-center">
-        <p className="text-sm font-bold uppercase mb-2">New Recruit?</p>
-        <Link 
-          href="/register" 
-          className="inline-block border-b-4 border-aura-gain text-aura-gain font-black hover:bg-aura-gain hover:text-black transition-colors px-1"
-        >
-          Request Access (Register)
-        </Link>
+      <div className="text-center opacity-50">
+        <p className="text-[10px] font-bold uppercase mb-2">Invite Only System</p>
       </div>
     </div>
   );
