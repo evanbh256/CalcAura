@@ -6,6 +6,8 @@ import { User, Trophy, AlertTriangle, ScrollText } from "lucide-react";
 
 import ChangePasswordForm from "@/components/ChangePasswordForm";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
 

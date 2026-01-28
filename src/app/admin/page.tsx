@@ -6,6 +6,8 @@ import { ShieldAlert, UserPlus } from "lucide-react";
 import CreateUserForm from "@/components/CreateUserForm";
 import DeleteUserButton from "@/components/DeleteUserButton";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
 
