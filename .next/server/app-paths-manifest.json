@@ -1,8 +1,19 @@
 {
-  "/page": "app/page.js",
-  "/profile/page": "app/profile/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/admin/users/route": "app/api/admin/users/route.js",
+  "/api/debug/expire/route": "app/api/debug/expire/route.js",
   "/admin/page": "app/admin/page.js",
+  "/api/incidents/[id]/resolve/route": "app/api/incidents/[id]/resolve/route.js",
+  "/api/incidents/route": "app/api/incidents/route.js",
+  "/api/user/password/route": "app/api/user/password/route.js",
+  "/leaderboard/page": "app/leaderboard/page.js",
+  "/login/page": "app/login/page.js",
+  "/api/register/route": "app/api/register/route.js",
   "/report/page": "app/report/page.js",
+  "/profile/page": "app/profile/page.js",
+  "/register/page": "app/register/page.js",
+  "/api/pulse/route": "app/api/pulse/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/leaderboard/page": "app/leaderboard/page.js"
+  "/page": "app/page.js",
+  "/api/votes/route": "app/api/votes/route.js"
 }
