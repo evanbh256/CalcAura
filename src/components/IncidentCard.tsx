@@ -90,12 +90,27 @@ export default function IncidentCard({ incident, currentUserId }: IncidentProps)
     }
   };
 
+  const timeAgo = (date: Date) => {
+    const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + "y ago";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + "mo ago";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + "d ago";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + "h ago";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + "m ago";
+    return "just now";
+  };
+
   return (
     <div className={`brutal-card space-y-3 relative overflow-hidden ${isClosed ? 'opacity-75' : ''}`}>
       {/* Status Badge */}
       <div className={`absolute top-0 right-0 px-2 py-1 text-[10px] font-black uppercase flex items-center gap-1 bg-aura-black border-l-2 border-b-2 border-aura-white ${getStatusColor(incident.status)}`}>
         {getStatusIcon(incident.status)}
-        {incident.status}
+        {incident.status} • {timeAgo(incident.createdAt)}
       </div>
 
       <div className="flex justify-between items-start pr-16">

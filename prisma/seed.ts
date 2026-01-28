@@ -44,7 +44,8 @@ async function main() {
   }
 
   // 4. Create dummy incidents to make feed look alive
-  
+  // CLEARED FOR PRODUCTION - START FRESH
+  /*
   // Incident 1: Tenzing reported Evan
   await prisma.incident.create({
     data: {
@@ -70,6 +71,7 @@ async function main() {
       expiresAt: new Date(Date.now() + 1000 * 60 * 60),
     }
   })
+  */
 
   console.log('✅ Seed complete')
 }
