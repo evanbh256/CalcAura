@@ -34,8 +34,9 @@ async function main() {
       data: {
         username: name,
         password,
-        auraScore: 1000, // Everyone starts equal
-        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`
+        auraScore: 1000,
+        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
+        isAdmin: name === 'Evan' // Make Evan the Admin
       },
     })
     users.push(user)

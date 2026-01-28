@@ -7,8 +7,8 @@ import { NextAuthProvider } from "@/components/Providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CalcAura | Raw Democracy",
-  description: "Private Aura Point Tracking for Friends",
+  title: "CalcAura",
+  description: "Aura Point Tracker",
 };
 
 export default function RootLayout({
