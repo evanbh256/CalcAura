@@ -1,4 +1,4 @@
-# CalcAura | Raw Democracy
+# CalcAura
 
 **CalcAura** is a private, brutalist social score tracker designed for close-knit friend groups. It tracks "Aura Points" based on real-world actions, allowing friends to report, vote, and judge each other in a gamified social experiment.
 
