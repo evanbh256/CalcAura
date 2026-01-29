@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { LayoutDashboard, Trophy, User, PlusCircle, ShieldAlert } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
+  const pathname = usePathname();
   const isAdmin = session?.user?.isAdmin;
 
-  if (status !== "authenticated") {
+  if (status !== "authenticated" || pathname === "/login") {
     return null;
   }
 
