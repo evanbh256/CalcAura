@@ -9,6 +9,7 @@ type IncidentProps = {
     id: string;
     description: string;
     auraAmount: number;
+    evidenceUrl?: string | null;
     status: string;
     createdAt: Date;
     expiresAt: Date;
@@ -153,6 +154,16 @@ export default function IncidentCard({ incident, currentUserId }: IncidentProps)
       <p className="text-sm font-bold border-l-4 border-aura-white pl-3 py-1 italic">
         "{incident.description}"
       </p>
+
+      {incident.evidenceUrl && (
+        <div className="mt-3">
+          {incident.evidenceUrl.match(/\.(mp4|webm|ogg)$/i) ? (
+            <video src={incident.evidenceUrl} controls className="w-full brutal-border-white" />
+          ) : (
+            <img src={incident.evidenceUrl} alt="Evidence" className="w-full brutal-border-white" />
+          )}
+        </div>
+      )}
 
       {!isClosed && (
         <div className="flex gap-2 pt-2">

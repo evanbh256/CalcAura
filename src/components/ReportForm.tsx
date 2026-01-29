@@ -35,12 +35,31 @@ export default function ReportForm({ users }: { users: UserType[] }) {
     const auraAmount = type === "loss" ? -amount : amount;
 
     try {
+      let evidenceUrl = "";
+      const file = formData.get("evidence") as File;
+
+      if (file && file.size > 0) {
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", file);
+        
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadFormData,
+        });
+
+        if (!uploadRes.ok) throw new Error("Failed to upload evidence");
+        
+        const uploadData = await uploadRes.json();
+        evidenceUrl = uploadData.url;
+      }
+
       const res = await fetch("/api/incidents", {
         method: "POST",
         body: JSON.stringify({
           offenderId,
           description,
           auraAmount,
+          evidenceUrl,
         }),
         headers: { "Content-Type": "application/json" },
       });
@@ -92,6 +111,16 @@ export default function ReportForm({ users }: { users: UserType[] }) {
           className="w-full bg-aura-black brutal-border-white p-3 font-bold focus:bg-aura-white focus:text-aura-black outline-none transition-colors h-32 rounded-none resize-none"
           placeholder="Describe exactly what happened..."
         ></textarea>
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-xs font-black uppercase">Evidence (Optional)</label>
+        <input 
+          name="evidence"
+          type="file"
+          accept="image/*,video/*"
+          className="w-full bg-aura-black brutal-border-white p-3 font-bold focus:bg-aura-white focus:text-aura-black outline-none transition-colors rounded-none file:mr-4 file:py-2 file:px-4 file:rounded-none file:border-0 file:text-sm file:font-semibold file:bg-aura-white file:text-aura-black hover:file:bg-gray-200"
+        />
       </div>
 
       <div className="space-y-2">
