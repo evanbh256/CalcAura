@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { User, Trophy, AlertTriangle, ScrollText } from "lucide-react";
 
 import ChangePasswordForm from "@/components/ChangePasswordForm";
+import LogoutButton from "@/components/LogoutButton";
+import AvatarForm from "@/components/AvatarForm";
 
 export const dynamic = "force-dynamic";
 
@@ -42,9 +44,15 @@ export default async function ProfilePage() {
   return (
     <div className="space-y-8 pb-24">
       <header className="flex flex-col items-center gap-4 pt-8">
-        <div className="w-32 h-32 bg-aura-white brutal-border border-aura-white rounded-full flex items-center justify-center overflow-hidden">
-           {/* If we had real avatars, we'd use <img src={user.avatarUrl} /> */}
-           <User size={64} className="text-aura-black" />
+        <div className="relative w-32 h-32 bg-aura-white brutal-border border-aura-white rounded-full flex items-center justify-center">
+           <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
+             {user.avatarUrl ? (
+               <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
+             ) : (
+               <User size={64} className="text-aura-black" />
+             )}
+           </div>
+           <AvatarForm initialAvatarUrl={user.avatarUrl} />
         </div>
         <div className="text-center">
           <h1 className="text-3xl font-black uppercase tracking-tight">{user.username}</h1>
@@ -108,6 +116,7 @@ export default async function ProfilePage() {
       </div>
 
       <ChangePasswordForm />
+      <LogoutButton />
     </div>
   );
 }
