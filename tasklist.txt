@@ -1,8 +1,0 @@
-# CALCAURA BACKEND TASK LIST - COMPLETED ✅
-
-All core backend tasks have been implemented and tested:
-- Authentication (Re-enabled)
-- Report API Connection
-- Real Profile Stats
-- Time-based "Pulse" System (Expirations & Seasons)
-- Judge Interface & Resolution Logic
