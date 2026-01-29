@@ -51,27 +51,54 @@ export async function runSystemPulse() {
     }
   }
 
-  // 3. Handle EXPIRING DISPUTED Incidents -> Assign Judge
+  // 3. Handle EXPIRING DISPUTED Incidents
+  // If Agree > Disagree -> Approved.
+  // Else -> Assign Judge (if not already assigned).
   const expiredDisputed = await prisma.incident.findMany({
     where: {
       status: "DISPUTED",
-      expiresAt: { lt: now },
-      judgeId: null // Only if no judge assigned yet
-    }
+      expiresAt: { lt: now }
+    },
+    include: { votes: true }
   });
 
   for (const incident of expiredDisputed) {
-    console.log(`⚖️ Finding judge for disputed incident ${incident.id}`);
-    const judge = await getJudgeForIncident(incident.id);
-    
-    if (judge) {
+    const agreeCount = incident.votes.filter(v => v.type === "AGREE").length;
+    const disagreeCount = incident.votes.filter(v => v.type === "DISAGREE").length;
+
+    if (agreeCount > disagreeCount) {
+      // Community voted to Approve
+      console.log(`✅ Community approved disputed incident ${incident.id} (${agreeCount} vs ${disagreeCount})`);
+      await prisma.$transaction([
+        prisma.incident.update({
+          where: { id: incident.id },
+          data: { status: "APPROVED" }
+        }),
+        prisma.user.update({
+          where: { id: incident.offenderId },
+          data: { auraScore: { increment: incident.auraAmount } }
+        })
+      ]);
+    } else if (disagreeCount > agreeCount) {
+      // Community voted to Reject
+      console.log(`❌ Community rejected disputed incident ${incident.id} (${disagreeCount} vs ${agreeCount})`);
       await prisma.incident.update({
         where: { id: incident.id },
-        data: { judgeId: judge.id }
+        data: { status: "REJECTED" }
       });
     } else {
-      // No eligible judge? Admin? Or just leave it?
-      // For now, leave it.
+      // Tie -> Requires Judge
+      if (!incident.judgeId) {
+        console.log(`⚖️ Finding judge for disputed incident ${incident.id}`);
+        const judge = await getJudgeForIncident(incident.id);
+        
+        if (judge) {
+          await prisma.incident.update({
+            where: { id: incident.id },
+            data: { judgeId: judge.id }
+          });
+        }
+      }
     }
   }
 
