@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import { sendNotification } from "@/lib/push";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -81,6 +82,12 @@ export async function POST(req: Request) {
         where: { id: incident.offenderId },
         data: { auraScore: { increment: incident.auraAmount } }
       })
+    ]);
+
+    // Notify involved parties
+    await Promise.all([
+        sendNotification(incident.offenderId, "Verdict: APPROVED", `The group voted against you. ${incident.auraAmount} aura applied.`),
+        sendNotification(incident.reporterId, "Verdict: APPROVED", `Your report against user was successful.`)
     ]);
     
     // Return early since we handled the DB update in transaction

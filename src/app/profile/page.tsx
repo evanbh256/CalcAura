@@ -3,10 +3,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { User, Trophy, AlertTriangle, ScrollText } from "lucide-react";
-
 import ChangePasswordForm from "@/components/ChangePasswordForm";
 import LogoutButton from "@/components/LogoutButton";
 import AvatarForm from "@/components/AvatarForm";
+import PushManager from "@/components/PushManager";
 
 export const dynamic = "force-dynamic";
 
@@ -115,6 +115,7 @@ export default async function ProfilePage() {
         </div>
       </div>
 
+      <PushManager />
       <ChangePasswordForm />
       <LogoutButton />
     </div>

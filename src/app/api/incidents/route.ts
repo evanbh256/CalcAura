@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import { sendNotification } from "@/lib/push";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -20,8 +21,8 @@ export async function POST(req: Request) {
   });
 
   if (recentReport) {
-    return NextResponse.json({ 
-      error: "Spam Cooldown: You can't report the same person twice in an hour." 
+    return NextResponse.json({
+      error: "Spam Cooldown: You can't report the same person twice in an hour."
     }, { status: 429 });
   }
 
@@ -40,6 +41,14 @@ export async function POST(req: Request) {
       status: "PENDING"
     }
   });
+
+  // Notify the offender
+  await sendNotification(
+    offenderId,
+    "Aura Alert",
+    `You've been reported by ${session.user.name || 'someone'}: "${description}"`,
+    "/"
+  );
 
   return NextResponse.json(incident);
 }
