@@ -47,7 +47,10 @@ export default function ReportForm({ users }: { users: UserType[] }) {
           body: uploadFormData,
         });
 
-        if (!uploadRes.ok) throw new Error("Failed to upload evidence");
+        if (!uploadRes.ok) {
+          const errorData = await uploadRes.json().catch(() => ({}));
+          throw new Error(errorData.error || uploadRes.statusText || "Failed to upload evidence");
+        }
         
         const uploadData = await uploadRes.json();
         evidenceUrl = uploadData.url;
