@@ -88,4 +88,4 @@
 This is a private project for the boys. If you have a feature idea, push it to main and pray it doesn't break the build.
 
 ---
-*Built with hate and neon green by Evan.*
+*Built with love and neon green by gemini-cli and prompted by Me.*
