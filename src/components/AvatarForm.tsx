@@ -20,6 +20,12 @@ export default function AvatarForm({ initialAvatarUrl }: AvatarFormProps) {
     setIsLoading(true);
     setError("");
 
+    if (!avatarUrl) {
+      setError("Please select an image");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/user/avatar", {
         method: "POST",
@@ -41,6 +47,23 @@ export default function AvatarForm({ initialAvatarUrl }: AvatarFormProps) {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 3 * 1024 * 1024) {
+      setError("File size must be less than 3MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarUrl(reader.result as string);
+      setError("");
+    };
+    reader.readAsDataURL(file);
+  };
+
   if (!isEditing) {
     return (
       <button 
@@ -60,17 +83,24 @@ export default function AvatarForm({ initialAvatarUrl }: AvatarFormProps) {
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-xs font-bold uppercase">Image URL</label>
+            <label className="text-xs font-bold uppercase">Select Image</label>
             <input 
-              type="url"
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder="https://example.com/image.png"
-              className="brutal-input w-full"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="brutal-input w-full p-2 bg-white text-black"
               required
             />
-            <p className="text-[10px] opacity-60">Paste a direct link to an image.</p>
+            <p className="text-[10px] opacity-60">Max size: 3MB. Formats: JPG, PNG, GIF.</p>
           </div>
+
+          {avatarUrl && (
+            <div className="flex justify-center">
+              <div className="w-20 h-20 rounded-full overflow-hidden brutal-border border-aura-white">
+                <img src={avatarUrl} alt="Preview" className="w-full h-full object-cover" />
+              </div>
+            </div>
+          )}
 
           {error && <p className="text-aura-loss text-xs font-bold">{error}</p>}
 

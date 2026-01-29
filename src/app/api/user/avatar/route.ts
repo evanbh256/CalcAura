@@ -11,11 +11,8 @@ export async function POST(req: Request) {
 
     const { avatarUrl } = await req.json();
 
-    // Basic URL validation
-    try {
-      new URL(avatarUrl);
-    } catch (_) {
-      return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
+    if (!avatarUrl) {
+      return NextResponse.json({ error: "No image provided" }, { status: 400 });
     }
 
     await prisma.user.update({

@@ -19,7 +19,13 @@ export default async function LeaderboardPage() {
           <div key={user.id} className={`brutal-card flex items-center justify-between ${index === 0 ? "bg-aura-gain text-aura-black" : ""}`}>
             <div className="flex items-center gap-4">
               <span className="text-2xl font-black">#{index + 1}</span>
-              <div className="w-10 h-10 bg-aura-white brutal-border border-aura-black"></div>
+              <div className="w-10 h-10 rounded-full overflow-hidden brutal-border border-aura-black bg-aura-white flex items-center justify-center">
+                {user.avatarUrl ? (
+                  <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-aura-white" />
+                )}
+              </div>
               <span className="font-bold text-lg">{user.username}</span>
             </div>
             <span className="text-2xl font-black">{user.auraScore}</span>

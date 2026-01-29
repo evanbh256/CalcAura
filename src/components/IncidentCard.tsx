@@ -15,7 +15,7 @@ type IncidentProps = {
     judgeId?: string | null;
     reporter: { username: string; avatarUrl: string | null };
     offender: { username: string; avatarUrl: string | null };
-    votes: { userId: string; type: string }[];
+    votes: { userId: string; type: string; user: { username: string; avatarUrl: string | null } }[];
   };
   currentUserId: string;
 };
@@ -23,15 +23,21 @@ type IncidentProps = {
 export default function IncidentCard({ incident, currentUserId }: IncidentProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showVoters, setShowVoters] = useState(false);
 
-  const agreeCount = incident.votes.filter((v) => v.type === "AGREE").length;
-  const disagreeCount = incident.votes.filter((v) => v.type === "DISAGREE").length;
-  const hasVoted = incident.votes.some((v) => v.userId === currentUserId);
+  const agreeVotes = incident.votes.filter((v) => v.type === "AGREE");
+  const disagreeVotes = incident.votes.filter((v) => v.type === "DISAGREE");
+  
+  const currentUserVote = incident.votes.find((v) => v.userId === currentUserId);
+  const hasVoted = !!currentUserVote;
   const isClosed = ["APPROVED", "REJECTED"].includes(incident.status);
   const isJudge = incident.judgeId === currentUserId;
 
   async function handleVote(type: "AGREE" | "DISAGREE") {
-    if (hasVoted || loading || isClosed) return;
+    if (loading || isClosed) return;
+    // Don't do anything if clicking the same vote
+    if (currentUserVote?.type === type) return;
+    
     setLoading(true);
 
     try {
@@ -116,13 +122,27 @@ export default function IncidentCard({ incident, currentUserId }: IncidentProps)
       <div className="flex justify-between items-start pr-16">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2 text-sm">
-            <span className="font-bold text-aura-gain flex items-center gap-1">
-              <User size={12} /> {incident.reporter.username}
+             <div className="w-4 h-4 rounded-full overflow-hidden bg-aura-black border border-aura-gain flex items-center justify-center">
+              {incident.reporter.avatarUrl ? (
+                <img src={incident.reporter.avatarUrl} alt={incident.reporter.username} className="w-full h-full object-cover" />
+              ) : (
+                <User size={10} className="text-aura-gain" />
+              )}
+            </div>
+            <span className="font-bold text-aura-gain">
+              {incident.reporter.username}
             </span>
             <span className="text-[10px] opacity-50 uppercase">Reported</span>
           </div>
-          <div className="flex items-center gap-2 text-xl font-black text-aura-white">
-            <span>{incident.offender.username}</span>
+          <div className="flex items-center gap-2 mt-1">
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-aura-white border-2 border-aura-white flex items-center justify-center">
+              {incident.offender.avatarUrl ? (
+                <img src={incident.offender.avatarUrl} alt={incident.offender.username} className="w-full h-full object-cover" />
+              ) : (
+                <User size={16} className="text-aura-black" />
+              )}
+            </div>
+            <span className="text-xl font-black text-aura-white">{incident.offender.username}</span>
           </div>
         </div>
         <span className={`text-2xl font-black ${incident.auraAmount > 0 ? "text-aura-gain" : "text-aura-loss"}`}>
@@ -138,20 +158,66 @@ export default function IncidentCard({ incident, currentUserId }: IncidentProps)
         <div className="flex gap-2 pt-2">
           <button
             onClick={() => handleVote("AGREE")}
-            disabled={hasVoted || loading}
-            className={`flex-1 brutal-button text-xs py-2 flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed
-              ${hasVoted ? 'bg-gray-800 text-gray-400 border-gray-600' : 'bg-aura-gain text-aura-black hover:bg-green-400'}`}
+            disabled={loading}
+            className={`flex-1 brutal-button text-xs py-2 flex justify-center items-center gap-2 
+              ${currentUserVote?.type === 'AGREE' 
+                ? 'bg-aura-gain text-aura-black ring-2 ring-white ring-offset-2 ring-offset-black' 
+                : 'bg-aura-gain/20 text-aura-gain border-aura-gain/50 hover:bg-aura-gain hover:text-aura-black'}`}
           >
-            AGREE ({agreeCount})
+            AGREE ({agreeVotes.length})
           </button>
           <button
             onClick={() => handleVote("DISAGREE")}
-            disabled={hasVoted || loading}
-            className={`flex-1 brutal-button text-xs py-2 flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed
-              ${hasVoted ? 'bg-gray-800 text-gray-400 border-gray-600' : 'bg-aura-loss text-aura-black hover:bg-red-500'}`}
+            disabled={loading}
+            className={`flex-1 brutal-button text-xs py-2 flex justify-center items-center gap-2
+              ${currentUserVote?.type === 'DISAGREE' 
+                ? 'bg-aura-loss text-aura-black ring-2 ring-white ring-offset-2 ring-offset-black' 
+                : 'bg-aura-loss/20 text-aura-loss border-aura-loss/50 hover:bg-aura-loss hover:text-aura-black'}`}
           >
-            DISAGREE ({disagreeCount})
+            DISAGREE ({disagreeVotes.length})
           </button>
+        </div>
+      )}
+
+      {/* Voters Toggle */}
+      <button 
+        onClick={() => setShowVoters(!showVoters)}
+        className="w-full text-[10px] uppercase font-bold text-center opacity-60 hover:opacity-100 mt-2"
+      >
+        {showVoters ? "Hide Voters" : `See who voted (${incident.votes.length})`}
+      </button>
+
+      {/* Voters List */}
+      {showVoters && (
+        <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-800">
+          <div>
+             <span className="text-[10px] text-aura-gain font-bold uppercase block mb-1">Agreed</span>
+             <div className="space-y-1">
+               {agreeVotes.map(v => (
+                 <div key={v.userId} className="flex items-center gap-2 text-xs">
+                    <div className="w-4 h-4 rounded-full overflow-hidden bg-gray-800 flex items-center justify-center">
+                        {v.user.avatarUrl ? <img src={v.user.avatarUrl} className="w-full h-full object-cover"/> : <User size={10} />}
+                    </div>
+                    <span className="opacity-80">{v.user.username}</span>
+                 </div>
+               ))}
+               {agreeVotes.length === 0 && <span className="text-[10px] opacity-40 italic">None</span>}
+             </div>
+          </div>
+          <div>
+             <span className="text-[10px] text-aura-loss font-bold uppercase block mb-1">Disagreed</span>
+             <div className="space-y-1">
+               {disagreeVotes.map(v => (
+                 <div key={v.userId} className="flex items-center gap-2 text-xs">
+                    <div className="w-4 h-4 rounded-full overflow-hidden bg-gray-800 flex items-center justify-center">
+                        {v.user.avatarUrl ? <img src={v.user.avatarUrl} className="w-full h-full object-cover"/> : <User size={10} />}
+                    </div>
+                    <span className="opacity-80">{v.user.username}</span>
+                 </div>
+               ))}
+               {disagreeVotes.length === 0 && <span className="text-[10px] opacity-40 italic">None</span>}
+             </div>
+          </div>
         </div>
       )}
 
@@ -178,10 +244,10 @@ export default function IncidentCard({ incident, currentUserId }: IncidentProps)
         </div>
       )}
 
-      {isClosed && (
+      {isClosed && !showVoters && (
         <div className="flex justify-between text-xs font-bold opacity-60 pt-2 border-t-2 border-gray-800 mt-2">
-          <span>Agreed: {agreeCount}</span>
-          <span>Disagreed: {disagreeCount}</span>
+          <span>Agreed: {agreeVotes.length}</span>
+          <span>Disagreed: {disagreeVotes.length}</span>
         </div>
       )}
     </div>

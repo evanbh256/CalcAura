@@ -28,7 +28,11 @@ export default async function Home() {
     include: {
       reporter: { select: { username: true, avatarUrl: true } },
       offender: { select: { username: true, avatarUrl: true } },
-      votes: true
+      votes: {
+        include: {
+          user: { select: { username: true, avatarUrl: true } }
+        }
+      }
     }
   });
 

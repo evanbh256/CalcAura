@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Incident closed or not found" }, { status: 400 });
   }
 
-  // Prevent double voting
+  // Handle Vote (Create or Update)
   const existingVote = await prisma.vote.findUnique({
     where: {
       userId_incidentId: {
@@ -30,22 +30,32 @@ export async function POST(req: Request) {
   });
 
   if (existingVote) {
-    return NextResponse.json({ error: "You already voted" }, { status: 400 });
+    if (existingVote.type === type) {
+      return NextResponse.json({ message: "Already voted this way" });
+    }
+    // Update existing vote
+    await prisma.vote.update({
+      where: { id: existingVote.id },
+      data: { type }
+    });
+  } else {
+    // Create new vote
+    await prisma.vote.create({
+      data: {
+        userId: session.user.id,
+        incidentId,
+        type
+      }
+    });
   }
 
-  // Record the vote
-  const vote = await prisma.vote.create({
-    data: {
-      userId: session.user.id,
-      incidentId,
-      type
-    }
+  // Refresh votes to calculate status
+  const freshVotes = await prisma.vote.findMany({
+    where: { incidentId }
   });
 
-  // Rule 2 Logic
-  const allVotes = [...incident.votes, vote];
-  const agreeCount = allVotes.filter(v => v.type === "AGREE").length;
-  const disagreeCount = allVotes.filter(v => v.type === "DISAGREE").length;
+  const agreeCount = freshVotes.filter(v => v.type === "AGREE").length;
+  // const disagreeCount = freshVotes.filter(v => v.type === "DISAGREE").length; 
 
   // Get total user count to calculate 50%
   const userCount = await prisma.user.count();
@@ -53,9 +63,8 @@ export async function POST(req: Request) {
   let newStatus = incident.status;
   let newExpiresAt = incident.expiresAt;
 
+  // Logic: Switching TO Disagree triggers Dispute
   if (type === "DISAGREE" && incident.status === "PENDING") {
-    // If anyone votes "Disagree" before it is approved, the status changes to "Disputed."
-    // Once "Disputed," the voting window remains open for 24 hours.
     newStatus = "DISPUTED";
     newExpiresAt = new Date(incident.createdAt.getTime() + 24 * 60 * 60 * 1000);
   } else if (agreeCount > userCount / 2 && incident.status === "PENDING") {
@@ -63,10 +72,19 @@ export async function POST(req: Request) {
     newStatus = "APPROVED";
     
     // Apply points immediately
-    await prisma.user.update({
-      where: { id: incident.offenderId },
-      data: { auraScore: { increment: incident.auraAmount } }
-    });
+    await prisma.$transaction([
+      prisma.incident.update({
+         where: { id: incidentId },
+         data: { status: "APPROVED" }
+      }),
+      prisma.user.update({
+        where: { id: incident.offenderId },
+        data: { auraScore: { increment: incident.auraAmount } }
+      })
+    ]);
+    
+    // Return early since we handled the DB update in transaction
+    return NextResponse.json({ status: "APPROVED" });
   }
 
   await prisma.incident.update({
@@ -74,5 +92,5 @@ export async function POST(req: Request) {
     data: { status: newStatus, expiresAt: newExpiresAt }
   });
 
-  return NextResponse.json({ vote, status: newStatus });
+  return NextResponse.json({ status: newStatus });
 }

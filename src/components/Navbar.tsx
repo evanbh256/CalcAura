@@ -5,8 +5,12 @@ import { LayoutDashboard, Trophy, User, PlusCircle, ShieldAlert } from "lucide-r
 import { useSession } from "next-auth/react";
 
 export default function Navbar() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const isAdmin = session?.user?.isAdmin;
+
+  if (status !== "authenticated") {
+    return null;
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-aura-black border-t-4 border-aura-white h-20 flex items-center justify-around px-4 z-50">
