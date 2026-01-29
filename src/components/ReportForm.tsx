@@ -9,6 +9,8 @@ type UserType = {
   username: string;
 };
 
+import { compressImage } from "@/lib/imageUtils";
+
 export default function ReportForm({ users }: { users: UserType[] }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -39,21 +41,13 @@ export default function ReportForm({ users }: { users: UserType[] }) {
       const file = formData.get("evidence") as File;
 
       if (file && file.size > 0) {
-        const uploadFormData = new FormData();
-        uploadFormData.append("file", file);
-        
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          body: uploadFormData,
-        });
-
-        if (!uploadRes.ok) {
-          const errorData = await uploadRes.json().catch(() => ({}));
-          throw new Error(errorData.error || uploadRes.statusText || "Failed to upload evidence");
+        // Compress image client-side to avoid "EROFS" on serverless and save bandwidth
+        try {
+          evidenceUrl = await compressImage(file);
+        } catch (compressErr) {
+          console.error("Compression failed", compressErr);
+          throw new Error("Failed to process image. Please try a different one.");
         }
-        
-        const uploadData = await uploadRes.json();
-        evidenceUrl = uploadData.url;
       }
 
       const res = await fetch("/api/incidents", {
@@ -121,7 +115,7 @@ export default function ReportForm({ users }: { users: UserType[] }) {
         <input 
           name="evidence"
           type="file"
-          accept="image/*,video/*"
+          accept="image/*"
           className="w-full bg-aura-black brutal-border-white p-3 font-bold focus:bg-aura-white focus:text-aura-black outline-none transition-colors rounded-none file:mr-4 file:py-2 file:px-4 file:rounded-none file:border-0 file:text-sm file:font-semibold file:bg-aura-white file:text-aura-black hover:file:bg-gray-200"
         />
       </div>
